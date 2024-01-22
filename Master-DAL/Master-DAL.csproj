@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="DbContext\" />
+    <Folder Include="Initiallizers\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>
