@@ -1,4 +1,14 @@
+using Master_BLL;
+using Master_DAL;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+ConfigurationManager configuration = builder.Configuration;
+builder.Services
+    .AddBLL()
+    .AddDAL(configuration);
 
 // Add services to the container.
 
