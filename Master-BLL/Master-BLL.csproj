@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Abstraction\" />
     <Folder Include="DTOs\" />
     <Folder Include="Repository\Interface\" />
     <Folder Include="Repository\Implementation\" />
