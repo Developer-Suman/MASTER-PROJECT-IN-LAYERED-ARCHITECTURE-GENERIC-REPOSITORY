@@ -14,9 +14,9 @@ namespace Master_BLL.DTOs.RegistrationDTOs
         public string Email { get; set; }
         [Required(ErrorMessage ="Password is Required")]
         public string Password { get; set; }
-        [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage ="The password and Confirmation Password donot Match.")]
-        public string ConfirmPassword { get; set; }
+        //[DataType(DataType.Password)]
+        //[Compare("Password", ErrorMessage ="The password and Confirmation Password donot Match.")]
+        //public string ConfirmPassword { get; set; }
 
         public string Role { get; set; }
     }

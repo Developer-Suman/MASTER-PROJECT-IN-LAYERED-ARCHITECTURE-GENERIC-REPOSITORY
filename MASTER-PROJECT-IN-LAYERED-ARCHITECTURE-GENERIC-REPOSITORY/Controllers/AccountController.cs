@@ -1,5 +1,6 @@
 ﻿using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Services.Interface;
+using Master_DAL.Abstraction;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,18 +21,18 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         #region Authentication
         [HttpPost("Register")]
-        public async Task<ActionResult> Register(RegistrationCreateDTOs registrationCreateDTOs)
+        public async Task<IActionResult> Register(RegistrationCreateDTOs registrationCreateDTOs)
         {
             var userExists = await _authenticationRepository.FindByNameAsync(registrationCreateDTOs.Username);
             if(userExists is not null)
             {
-                throw new Exception("User Already Exists");
+                return BadRequest("User Already Exists");
             }
 
             var emailExists = await _authenticationRepository.FindByEmailAsync(registrationCreateDTOs.Email);
             if(emailExists is not null)
             {
-                throw new Exception("Email Alreday Exists");
+                return BadRequest("Email Already Exists");
             }
 
             ApplicationUser user = new()
@@ -45,10 +46,38 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
             if(!result.Succeeded)
             {
-                throw new Exception("User Creation Failed");
+                return BadRequest("An error occured while adding user");
             }
 
+            await _authenticationRepository.CreateRoles(user, registrationCreateDTOs.Role);
+
+           
             return Ok(result);
+
+
+
+            //public async Task<ActionResult> Register(RegistrationCreateDTOs registrationCreateDTOs)
+            //{
+            //    // Your registration logic here
+
+            //    // Assume registration is successful and you have some data to return
+            //    string registrationResultData = "Registration successful data";
+
+            //    // Create a successful Result using the Success method
+            //    Result<string> successResult = Result<string>.Success(registrationResultData);
+
+            //    // Return the appropriate ActionResult based on the Result
+            //    if (successResult.IsSuccess)
+            //    {
+            //        // If registration is successful, return Ok with the data
+            //        return Ok(successResult.Data);
+            //    }
+            //    else
+            //    {
+            //        // If registration fails, return BadRequest with the errors
+            //        return BadRequest(successResult.Errors);
+            //    }
+            //}
 
         }
         #endregion

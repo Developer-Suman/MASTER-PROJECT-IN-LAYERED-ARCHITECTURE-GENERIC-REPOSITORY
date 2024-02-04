@@ -23,6 +23,11 @@ namespace Master_BLL.Services.Implementation
             return await _userManager.CheckPasswordAsync(username, password);
         }
 
+        public async Task<IdentityResult> CreateRoles(ApplicationUser user, string role)
+        {
+            return await _userManager.AddToRoleAsync(user, role);
+        }
+
         public async Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password)
         {
             return await _userManager.CreateAsync(user, password);
