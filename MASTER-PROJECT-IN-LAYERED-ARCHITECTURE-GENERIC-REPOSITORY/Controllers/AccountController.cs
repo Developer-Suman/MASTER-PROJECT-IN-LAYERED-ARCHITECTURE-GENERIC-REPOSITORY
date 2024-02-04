@@ -14,10 +14,12 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
     public class AccountController : ControllerBase
     {
         public readonly IAuthenticationRepository _authenticationRepository;
+        private readonly IJwtProvider _jwtProvider;
 
-        public AccountController(IAuthenticationRepository authenticationRepository)
+        public AccountController(IAuthenticationRepository authenticationRepository, IJwtProvider jwtProvider)
         {
-                _authenticationRepository = authenticationRepository;
+            _authenticationRepository = authenticationRepository;
+            _jwtProvider = jwtProvider;
             
         }
 
@@ -62,7 +64,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         #region Create Roles
         [HttpGet("CreateRole")]
-        public async Task<ActionResult> CreateRolesAsync(ApplicationUser user, string rolename)
+        public async Task<ActionResult> CreateRolesAsync(string rolename)
         {
             var roleExists = await _authenticationRepository.CheckRoleAsync(rolename);
             if(!roleExists)
@@ -87,9 +89,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         #region Assign Roles
         [HttpPost("AssignRoles")]
-        public async Task<ActionResult> AssignRolesAsync(ApplicationUser applicationUser, string rolename)
+        public async Task<ActionResult> AssignRolesAsync(string userId, string rolename)
         {
-            var user = await _authenticationRepository.FindByIdAsync(applicationUser.Id);
+            var user = await _authenticationRepository.FindByIdAsync(userId);
             if(user is not null)
             {
                 var result = await _authenticationRepository.AssignRoles(user,rolename);
@@ -107,6 +109,40 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             {
                 return NotFound("User not Found");
             }
+        }
+        #endregion
+
+        #region RefreshToken
+        public async Task<IActionResult> NewRefreshToken(string refreshtoken,string token)
+        {
+            var principal = _jwtProvider.GetPrincipalFromExpiredToken(token);
+            if(principal is null)
+            {
+                return BadRequest("Invalid Token");
+
+            }
+
+            string username = principal.Identity!.Name!;
+            if(username is null)
+            {
+                return BadRequest("Invalid Token");
+            }
+
+            var user = await _authenticationRepository.FindByNameAsync(username);
+
+            if(user is null || user.RefreshToken != refreshtoken || user.RefreshTokenExpiryTime <= DateTime.Now)
+            {
+                return BadRequest("Invalid Access Token and refresh Token");
+            }
+
+
+            var roles = await _authenticationRepository.GetRolesAsync(user);
+            var newToken = _jwtProvider.Generate(user, roles);
+            var newRefreshToken = _jwtProvider.GenerateRefreshToken();
+            user.RefreshToken= newToken;
+            await _authenticationRepository.UpdateUserAsync(user);
+
+            return Ok(new {Token = newToken, RefreshToken = newRefreshToken });
         }
         #endregion
     }
