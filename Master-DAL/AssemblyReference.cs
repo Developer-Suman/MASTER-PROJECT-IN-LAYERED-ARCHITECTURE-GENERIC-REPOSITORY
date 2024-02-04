@@ -28,26 +28,25 @@ namespace Master_DAL
              .AddDefaultTokenProviders();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new()
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ClockSkew = TimeSpan.Zero,
-                        ValidIssuer = configuration["Jwt:Issuer"],
-                        ValidAudience = configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!
-                            ))
-                    };
-                });
+                            .AddJwtBearer(options =>
+                            {
+                                options.TokenValidationParameters = new()
+                                {
+                                    ValidateIssuer = true,
+                                    ValidateAudience = true,
+                                    ValidateLifetime = true,
+                                    ValidateIssuerSigningKey = true,
+                                    ClockSkew = TimeSpan.Zero,
+                                    ValidIssuer = configuration["Jwt:Issuer"],
+                                    ValidAudience = configuration["Jwt:Audience"],
+                                    IssuerSigningKey = new SymmetricSecurityKey(
+                                        Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!))
+                                };
+                            });
 
 
 
-           
+
             return services;
 
             

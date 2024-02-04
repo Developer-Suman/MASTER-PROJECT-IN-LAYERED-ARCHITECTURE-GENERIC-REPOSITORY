@@ -1,4 +1,5 @@
-﻿using Master_BLL.DTOs.RegistrationDTOs;
+﻿using Master_BLL.DTOs.LoginDTOs;
+using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;
 using Master_DAL.Models;
@@ -15,12 +16,15 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
     {
         public readonly IAuthenticationRepository _authenticationRepository;
         private readonly IJwtProvider _jwtProvider;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(IAuthenticationRepository authenticationRepository, IJwtProvider jwtProvider)
+        public AccountController(IAuthenticationRepository authenticationRepository, IJwtProvider jwtProvider, IConfiguration configuration)
         {
             _authenticationRepository = authenticationRepository;
             _jwtProvider = jwtProvider;
-            
+            _configuration = configuration;
+
+
         }
 
         #region Authentication
@@ -53,11 +57,40 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 return BadRequest("An error occured while adding user");
             }
 
-            //await _authenticationRepository.CreateRoles(user, registrationCreateDTOs.Role);
-
-           
+            await _authenticationRepository.AssignRoles(user, registrationCreateDTOs.Role);
             return Ok(result);
 
+        }
+        #endregion
+
+        #region Login
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login(LoginDTOs userModel)
+        {
+            var user = await _authenticationRepository.FindByEmailAsync(userModel.Email);
+            if(user is null)
+            {
+                return BadRequest("Unauthorized: Invalid Credentials");
+            }
+            if(!await _authenticationRepository.CheckPasswordAsync(user, userModel.Password))
+            {
+                return BadRequest("Unauthorized: Invalid Credentials");
+
+            }
+
+            var roles = await _authenticationRepository.GetRolesAsync(user);
+            string token = _jwtProvider.Generate(user, roles);
+
+            string refreshToken = _jwtProvider.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+
+            _ = int.TryParse(_configuration["Jwt:RefreshTokenValidityInDays"], out int refreshTokenValidityInDays);
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(refreshTokenValidityInDays);
+
+            await _authenticationRepository.UpdateUserAsync(user);
+
+            return Ok(new {Token =  token, RefreshToken = refreshToken});
         }
         #endregion
 
@@ -113,6 +146,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         #endregion
 
         #region RefreshToken
+        [HttpPost("RefreshToken")]
         public async Task<IActionResult> NewRefreshToken(string refreshtoken,string token)
         {
             var principal = _jwtProvider.GetPrincipalFromExpiredToken(token);
