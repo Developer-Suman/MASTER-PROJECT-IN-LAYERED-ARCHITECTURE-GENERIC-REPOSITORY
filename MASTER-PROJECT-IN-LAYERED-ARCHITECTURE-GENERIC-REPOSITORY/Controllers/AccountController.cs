@@ -3,6 +3,8 @@ using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
@@ -49,36 +51,62 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 return BadRequest("An error occured while adding user");
             }
 
-            await _authenticationRepository.CreateRoles(user, registrationCreateDTOs.Role);
+            //await _authenticationRepository.CreateRoles(user, registrationCreateDTOs.Role);
 
            
             return Ok(result);
 
+        }
+        #endregion
 
 
-            //public async Task<ActionResult> Register(RegistrationCreateDTOs registrationCreateDTOs)
-            //{
-            //    // Your registration logic here
+        #region Create Roles
+        [HttpGet("CreateRole")]
+        public async Task<ActionResult> CreateRolesAsync(ApplicationUser user, string rolename)
+        {
+            var roleExists = await _authenticationRepository.CheckRoleAsync(rolename);
+            if(!roleExists)
+            {
+                var result = await _authenticationRepository.CreateRoles(rolename);
+                if(result.Succeeded)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(result.Errors);
+                }
+            }
+            else
+            {
+                return Conflict("Role Already Exists");
+            }
 
-            //    // Assume registration is successful and you have some data to return
-            //    string registrationResultData = "Registration successful data";
+        }
+        #endregion
 
-            //    // Create a successful Result using the Success method
-            //    Result<string> successResult = Result<string>.Success(registrationResultData);
+        #region Assign Roles
+        [HttpPost("AssignRoles")]
+        public async Task<ActionResult> AssignRolesAsync(ApplicationUser applicationUser, string rolename)
+        {
+            var user = await _authenticationRepository.FindByIdAsync(applicationUser.Id);
+            if(user is not null)
+            {
+                var result = await _authenticationRepository.AssignRoles(user,rolename);
+                if(result.Succeeded)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(result.Errors);
+                }
 
-            //    // Return the appropriate ActionResult based on the Result
-            //    if (successResult.IsSuccess)
-            //    {
-            //        // If registration is successful, return Ok with the data
-            //        return Ok(successResult.Data);
-            //    }
-            //    else
-            //    {
-            //        // If registration fails, return BadRequest with the errors
-            //        return BadRequest(successResult.Errors);
-            //    }
-            //}
-
+            }
+            else
+            {
+                return NotFound("User not Found");
+            }
         }
         #endregion
     }

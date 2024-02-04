@@ -12,20 +12,34 @@ namespace Master_BLL.Services.Implementation
     public class AuthenticationRepository : IAuthenticationRepository
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AuthenticationRepository(UserManager<ApplicationUser> userManager)
+        public AuthenticationRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             
         }
+
+        public async Task<IdentityResult> AssignRoles(ApplicationUser user, string rolename)
+        {
+            return await _userManager.AddToRoleAsync(user, rolename);
+        }
+
         public async Task<bool> CheckPasswordAsync(ApplicationUser username, string password)
         {
             return await _userManager.CheckPasswordAsync(username, password);
         }
 
-        public async Task<IdentityResult> CreateRoles(ApplicationUser user, string role)
+        public async Task<bool> CheckRoleAsync(string role)
         {
-            return await _userManager.AddToRoleAsync(user, role);
+            return await _roleManager.RoleExistsAsync(role);
+        }
+
+        public async Task<IdentityResult> CreateRoles(string role)
+        {
+            return await _roleManager.CreateAsync(new IdentityRole(role));
+            
         }
 
         public async Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password)
@@ -42,6 +56,11 @@ namespace Master_BLL.Services.Implementation
             }
 
             return user;
+        }
+
+        public async Task<ApplicationUser?> FindByIdAsync(string Id)
+        {
+            return await _userManager.FindByIdAsync(Id);
         }
 
         public async Task<ApplicationUser> FindByNameAsync(string username)

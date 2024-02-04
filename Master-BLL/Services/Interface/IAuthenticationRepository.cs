@@ -11,11 +11,14 @@ namespace Master_BLL.Services.Interface
     public interface IAuthenticationRepository
     {
         Task<ApplicationUser> FindByNameAsync(string username);
+        Task<ApplicationUser> FindByIdAsync(string Id);
         Task<IList<string>> GetRolesAsync(ApplicationUser username);
         Task<ApplicationUser> FindByEmailAsync(string email);
         Task<bool> CheckPasswordAsync(ApplicationUser username, string password);
         Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password);
         Task UpdateUserAsync(ApplicationUser user);
-        Task<IdentityResult> CreateRoles(ApplicationUser user, string role);
+        Task<IdentityResult> CreateRoles(string role);
+        Task<IdentityResult> AssignRoles(ApplicationUser user, string rolename);
+        Task<bool> CheckRoleAsync(string role);
     }
 }
