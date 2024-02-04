@@ -47,8 +47,7 @@ namespace Master_DAL
 
 
 
-            services.AddAuthorization();
-            services.AddScoped<IJwtProvider, JwtProvider>();
+           
             return services;
 
             
