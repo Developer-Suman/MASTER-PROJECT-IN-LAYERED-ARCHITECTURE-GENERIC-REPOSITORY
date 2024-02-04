@@ -16,5 +16,6 @@ namespace Master_BLL.Services.Interface
         Task<bool> CheckPasswordAsync(ApplicationUser username, string password);
         Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password);
         Task UpdateUserAsync(ApplicationUser user);
+        Task<IdentityResult> CreateRoles(ApplicationUser user, string role);
     }
 }
