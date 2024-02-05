@@ -179,5 +179,35 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             return Ok(new {Token = newToken, RefreshToken = newRefreshToken });
         }
         #endregion
+
+        #region AllUsers
+        [HttpGet("AllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _authenticationRepository.GetAllUsers();
+            if(users is null)
+            {
+                return NotFound("User are Not Found");
+            }
+            return Ok(users);
+        }
+
+        #endregion
+
+
+        #region GetById
+        [HttpGet("GetByUserId")]
+        public async Task<IActionResult> GetByUserId(string Id)
+        {
+            var user = await _authenticationRepository.GetById(Id);
+            if(user is null)
+            {
+                return NotFound("User are Not Found");
+            }
+            return Ok(user);
+
+        }
+
+        #endregion
     }
 }

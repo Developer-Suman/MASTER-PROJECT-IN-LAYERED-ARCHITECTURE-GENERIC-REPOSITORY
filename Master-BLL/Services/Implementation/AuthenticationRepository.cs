@@ -1,6 +1,7 @@
 ﻿using Master_BLL.Services.Interface;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,6 +72,16 @@ namespace Master_BLL.Services.Implementation
                 return default!;
             }
             return user;
+        }
+
+        public async Task<List<ApplicationUser>?> GetAllUsers()
+        {
+            return await _userManager.Users.ToListAsync();
+        }
+
+        public async Task<ApplicationUser> GetById(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
         }
 
         public async Task<IList<string>> GetRolesAsync(ApplicationUser username)

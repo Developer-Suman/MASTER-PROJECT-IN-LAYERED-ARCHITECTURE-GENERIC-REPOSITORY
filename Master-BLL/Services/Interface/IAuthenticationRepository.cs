@@ -20,5 +20,7 @@ namespace Master_BLL.Services.Interface
         Task<IdentityResult> CreateRoles(string role);
         Task<IdentityResult> AssignRoles(ApplicationUser user, string rolename);
         Task<bool> CheckRoleAsync(string role);
+        Task<List<ApplicationUser>?> GetAllUsers();
+        Task<ApplicationUser> GetById(string id);
     }
 }
