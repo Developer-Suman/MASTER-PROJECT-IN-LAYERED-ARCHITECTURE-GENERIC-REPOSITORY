@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Master_BLL.DTOs.LoginDTOs
+namespace Master_BLL.DTOs.Authentication
 {
     public class LoginDTOs
     {
