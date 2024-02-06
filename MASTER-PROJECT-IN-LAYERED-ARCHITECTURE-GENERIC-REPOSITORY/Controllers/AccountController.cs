@@ -1,4 +1,5 @@
-﻿using Master_BLL.DTOs.LoginDTOs;
+﻿using AutoMapper;
+using Master_BLL.DTOs.Authentication;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Transactions;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
@@ -17,12 +19,14 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         public readonly IAuthenticationRepository _authenticationRepository;
         private readonly IJwtProvider _jwtProvider;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper; 
 
-        public AccountController(IAuthenticationRepository authenticationRepository, IJwtProvider jwtProvider, IConfiguration configuration)
+        public AccountController(IAuthenticationRepository authenticationRepository,IMapper mapper, IJwtProvider jwtProvider, IConfiguration configuration)
         {
             _authenticationRepository = authenticationRepository;
             _jwtProvider = jwtProvider;
             _configuration = configuration;
+            _mapper=  mapper;
 
 
         }
@@ -31,34 +35,58 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegistrationCreateDTOs registrationCreateDTOs)
         {
-            var userExists = await _authenticationRepository.FindByNameAsync(registrationCreateDTOs.Username);
-            if(userExists is not null)
+            using(var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                return BadRequest("User Already Exists");
+                try
+                {
+                    var userExists = await _authenticationRepository.FindByNameAsync(registrationCreateDTOs.Username);
+                    if (userExists is not null)
+                    {
+                        return BadRequest("User Already Exists");
+                    }
+
+                    var emailExists = await _authenticationRepository.FindByEmailAsync(registrationCreateDTOs.Email);
+                    if (emailExists is not null)
+                    {
+                        return BadRequest("Email Already Exists");
+                    }
+
+                    var user = _mapper.Map<ApplicationUser>(registrationCreateDTOs);
+
+                    //ApplicationUser user = new()
+                    //{
+                    //    UserName = registrationCreateDTOs.Username,
+                    //    Email = registrationCreateDTOs.Email,
+                    //    SecurityStamp = Guid.NewGuid().ToString(),
+                    //};
+
+                    var result = await _authenticationRepository.CreateUserAsync(user, registrationCreateDTOs.Password);
+
+                    if (!result.Succeeded)
+                    {                                                                                                                       
+                        scope.Dispose();
+                        return BadRequest("User Creation Failed");
+                    }
+
+                    //Add the user to desired role
+                    if(!string.IsNullOrWhiteSpace(registrationCreateDTOs.Role))
+                    {
+                        await _authenticationRepository.AssignRoles(user, registrationCreateDTOs.Role);
+
+                    }
+
+                    //if everything succeed, commit the transaction
+                    scope.Complete();
+                    
+                    return Ok(result);
+
+                }
+                catch(Exception ex)
+                {
+                    throw new Exception("Something went wrong during user creation", ex);
+
+                }
             }
-
-            var emailExists = await _authenticationRepository.FindByEmailAsync(registrationCreateDTOs.Email);
-            if(emailExists is not null)
-            {
-                return BadRequest("Email Already Exists");
-            }
-
-            ApplicationUser user = new()
-            {
-                UserName = registrationCreateDTOs.Username,
-                Email = registrationCreateDTOs.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-            };
-
-            var result = await _authenticationRepository.CreateUserAsync(user, registrationCreateDTOs.Password);
-
-            if(!result.Succeeded)
-            {
-                return BadRequest("An error occured while adding user");
-            }
-
-            await _authenticationRepository.AssignRoles(user, registrationCreateDTOs.Role);
-            return Ok(result);
 
         }
         #endregion

@@ -1,4 +1,5 @@
-﻿using Master_BLL.Services.Implementation;
+﻿using AutoMapper;
+using Master_BLL.Services.Implementation;
 using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;
 using Master_DAL.JWT;
@@ -19,6 +20,10 @@ namespace Master_BLL
             services.AddAuthorization();
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+
+
+            
+
             return services;
         }
     }
