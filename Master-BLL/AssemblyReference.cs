@@ -20,6 +20,7 @@ namespace Master_BLL
             services.AddAuthorization();
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+            services.AddScoped<IAccountServices, AccountServices>();
 
 
             

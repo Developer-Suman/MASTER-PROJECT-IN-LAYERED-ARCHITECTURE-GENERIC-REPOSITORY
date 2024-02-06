@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System.Transactions;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
@@ -17,16 +18,17 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
     public class AccountController : ControllerBase
     {
         public readonly IAuthenticationRepository _authenticationRepository;
-        private readonly IJwtProvider _jwtProvider;
-        private readonly IConfiguration _configuration;
+ 
         private readonly IMapper _mapper; 
+        private readonly IAccountServices _accountServices;
+        private readonly IJwtProvider _jwtProvider;
 
-        public AccountController(IAuthenticationRepository authenticationRepository,IMapper mapper, IJwtProvider jwtProvider, IConfiguration configuration)
+        public AccountController(IJwtProvider jwtProvider,IAccountServices accountServices ,IAuthenticationRepository authenticationRepository,IMapper mapper)
         {
             _authenticationRepository = authenticationRepository;
-            _jwtProvider = jwtProvider;
-            _configuration = configuration;
+            _jwtProvider    = jwtProvider;
             _mapper=  mapper;
+            _accountServices = accountServices;
 
 
         }
@@ -35,58 +37,16 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegistrationCreateDTOs registrationCreateDTOs)
         {
-            using(var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var registrationResult = await _accountServices.RegisterUser(registrationCreateDTOs);
+            if(registrationResult.Data is not null)
             {
-                try
-                {
-                    var userExists = await _authenticationRepository.FindByNameAsync(registrationCreateDTOs.Username);
-                    if (userExists is not null)
-                    {
-                        return BadRequest("User Already Exists");
-                    }
-
-                    var emailExists = await _authenticationRepository.FindByEmailAsync(registrationCreateDTOs.Email);
-                    if (emailExists is not null)
-                    {
-                        return BadRequest("Email Already Exists");
-                    }
-
-                    var user = _mapper.Map<ApplicationUser>(registrationCreateDTOs);
-
-                    //ApplicationUser user = new()
-                    //{
-                    //    UserName = registrationCreateDTOs.Username,
-                    //    Email = registrationCreateDTOs.Email,
-                    //    SecurityStamp = Guid.NewGuid().ToString(),
-                    //};
-
-                    var result = await _authenticationRepository.CreateUserAsync(user, registrationCreateDTOs.Password);
-
-                    if (!result.Succeeded)
-                    {                                                                                                                       
-                        scope.Dispose();
-                        return BadRequest("User Creation Failed");
-                    }
-
-                    //Add the user to desired role
-                    if(!string.IsNullOrWhiteSpace(registrationCreateDTOs.Role))
-                    {
-                        await _authenticationRepository.AssignRoles(user, registrationCreateDTOs.Role);
-
-                    }
-
-                    //if everything succeed, commit the transaction
-                    scope.Complete();
-                    
-                    return Ok(result);
-
-                }
-                catch(Exception ex)
-                {
-                    throw new Exception("Something went wrong during user creation", ex);
-
-                }
+                return Ok(registrationResult.Data);
             }
+            else
+            {
+                return BadRequest(registrationResult.Errors);
+            }
+            
 
         }
         #endregion
@@ -95,30 +55,16 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDTOs userModel)
         {
-            var user = await _authenticationRepository.FindByEmailAsync(userModel.Email);
-            if(user is null)
+            var loginResult = await _accountServices.LoginUser(userModel);
+            if(loginResult.Data is not null)
             {
-                return BadRequest("Unauthorized: Invalid Credentials");
+                return Ok(loginResult.Data);
             }
-            if(!await _authenticationRepository.CheckPasswordAsync(user, userModel.Password))
+            else
             {
-                return BadRequest("Unauthorized: Invalid Credentials");
-
+                return BadRequest(loginResult.Errors);
             }
-
-            var roles = await _authenticationRepository.GetRolesAsync(user);
-            string token = _jwtProvider.Generate(user, roles);
-
-            string refreshToken = _jwtProvider.GenerateRefreshToken();
-
-            user.RefreshToken = refreshToken;
-
-            _ = int.TryParse(_configuration["Jwt:RefreshTokenValidityInDays"], out int refreshTokenValidityInDays);
-            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(refreshTokenValidityInDays);
-
-            await _authenticationRepository.UpdateUserAsync(user);
-
-            return Ok(new {Token =  token, RefreshToken = refreshToken});
+            
         }
         #endregion
 
