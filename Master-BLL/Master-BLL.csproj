@@ -11,6 +11,7 @@
     <Folder Include="Abstraction\" />
     <Folder Include="Repository\Interface\" />
     <Folder Include="Repository\Implementation\" />
+    <Folder Include="Static\Roles\" />
   </ItemGroup>
 
   <ItemGroup>
