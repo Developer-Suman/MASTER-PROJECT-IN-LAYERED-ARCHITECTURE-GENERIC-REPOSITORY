@@ -1,4 +1,5 @@
-﻿using Master_DAL.Models;
+﻿using Master_BLL.DTOs.Authentication;
+using Master_DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Master_BLL.Services.Interface
         Task<IdentityResult> CreateRoles(string role);
         Task<IdentityResult> AssignRoles(ApplicationUser user, string rolename);
         Task<bool> CheckRoleAsync(string role);
-        Task<List<ApplicationUser>?> GetAllUsers();
-        Task<ApplicationUser> GetById(string id);
+        Task<List<UserDTOs>?> GetAllUsers(int page, int pageSize);
+        Task<UserDTOs> GetById(string id);
     }
 }
