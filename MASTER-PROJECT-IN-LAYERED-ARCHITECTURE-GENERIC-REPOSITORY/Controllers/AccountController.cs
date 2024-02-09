@@ -62,7 +62,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             }
             else
             {
-                return BadRequest(loginResult.Errors);
+                return Unauthorized(loginResult.Errors);
             }
             
         }

@@ -34,6 +34,7 @@ namespace Master_BLL.Services.Implementation
             {
                 _memoryCache.Set(cacheKey, value, options);
             }
+            await Task.CompletedTask;
         }
     }
 }
