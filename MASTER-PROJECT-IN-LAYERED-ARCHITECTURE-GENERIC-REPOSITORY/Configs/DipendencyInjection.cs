@@ -1,4 +1,8 @@
 ﻿using AutoMapper;
+using Master_BLL.Services.Implementation;
+using Master_BLL.Services.Interface;
+using Master_DAL.Abstraction;
+using Master_DAL.JWT;
 using Microsoft.OpenApi.Models;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
@@ -7,6 +11,8 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
     {
         public static void Inject(WebApplicationBuilder builder)
         {
+
+            #region Configuration
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -42,31 +48,17 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
                     });
                 }
             );
-
-
-            //CORS Enable
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAllOrigins",
-                    builder =>
-                    {
-                        builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                    });
-            });
-
-
+            #endregion
+            #region InjectDependency
             builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization();
+            builder.Services.AddScoped<IJwtProvider, JwtProvider>();
+            builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+            builder.Services.AddScoped<IAccountServices, AccountServices>();
+            builder.Services.AddMemoryCache();
+            builder.Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
+            #endregion
 
-
-            // Auto Mapper Configurations
-            var mappingConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-            IMapper mapper = mappingConfig.CreateMapper();
-            builder.Services.AddSingleton(mapper);
         }
     }
 }
