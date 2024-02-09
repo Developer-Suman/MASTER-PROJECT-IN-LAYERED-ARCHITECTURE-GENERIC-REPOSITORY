@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Drawing.Printing;
 using System.Transactions;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
@@ -156,9 +157,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         #region AllUsers
         [HttpGet("AllUsers")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers(int page, int pageSize)
         {
-            var users = await _authenticationRepository.GetAllUsers();
+            var users = await _authenticationRepository.GetAllUsers(page,pageSize);
             if(users is null)
             {
                 return NotFound("User are Not Found");
