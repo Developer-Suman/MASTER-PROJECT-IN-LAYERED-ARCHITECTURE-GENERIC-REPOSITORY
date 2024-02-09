@@ -13,6 +13,7 @@ namespace Master_BLL.Services.Interface
     {
         Task<Result<RegistrationCreateDTOs>> RegisterUser(RegistrationCreateDTOs userModel);
         Task<Result<TokenDTOs>> LoginUser(LoginDTOs userModel);
+        //Task<Result<>>
 
     }
 }

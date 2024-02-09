@@ -21,6 +21,8 @@ namespace Master_BLL
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             services.AddScoped<IAccountServices, AccountServices>();
+            services.AddMemoryCache();
+            services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
 
 
             

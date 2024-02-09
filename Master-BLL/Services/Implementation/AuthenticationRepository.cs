@@ -1,4 +1,5 @@
 ﻿using Master_BLL.Services.Interface;
+using Master_BLL.Static.Cache;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,13 @@ namespace Master_BLL.Services.Implementation
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IMemoryCacheRepository _memoryCacheRepository;
 
-        public AuthenticationRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AuthenticationRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IMemoryCacheRepository memoryCacheRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            
+            _memoryCacheRepository = memoryCacheRepository;
         }
 
         public async Task<IdentityResult> AssignRoles(ApplicationUser user, string rolename)
@@ -76,7 +78,21 @@ namespace Master_BLL.Services.Implementation
 
         public async Task<List<ApplicationUser>?> GetAllUsers()
         {
-            return await _userManager.Users.ToListAsync();
+            var cacheKeys = CacheKeys.User;
+            var cacheData = await _memoryCacheRepository.GetCahceKey<List<ApplicationUser>>(cacheKeys);
+
+            if(cacheData is not null && cacheData.Count > 0)
+            {
+                return cacheData;
+            }
+            var users =  await _userManager.Users.ToListAsync();
+
+            await _memoryCacheRepository.SetAsync(cacheKeys, users, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30) 
+            });
+
+            return users;
         }
 
         public async Task<ApplicationUser> GetById(string id)

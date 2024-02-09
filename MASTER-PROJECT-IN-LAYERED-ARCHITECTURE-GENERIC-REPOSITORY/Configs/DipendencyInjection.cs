@@ -16,7 +16,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             builder.Services.AddSwaggerGen(
                 option =>
                 {
-                    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Ghaderi Freema API", Version = "V1" });
+                    option.SwaggerDoc("v1", new OpenApiInfo { Title = "MASTER PROJECT API", Version = "V1" });
                     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                     {
                         In = ParameterLocation.Header,
