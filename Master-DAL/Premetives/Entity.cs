@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Master_DAL.Premetives
 {
-    internal class Entity
+    public abstract class Entity
     {
+        protected Entity(Guid id) =>Id = id;
+       
+        public Guid Id { get; set; }
     }
 }

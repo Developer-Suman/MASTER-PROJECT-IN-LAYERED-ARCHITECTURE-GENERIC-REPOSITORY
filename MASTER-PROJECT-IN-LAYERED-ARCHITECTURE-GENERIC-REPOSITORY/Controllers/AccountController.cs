@@ -128,21 +128,21 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             var principal = _jwtProvider.GetPrincipalFromExpiredToken(token);
             if(principal is null)
             {
-                return BadRequest("Invalid Token");
+                return Unauthorized("Invalid Token");
 
             }
 
             string username = principal.Identity!.Name!;
             if(username is null)
             {
-                return BadRequest("Invalid Token");
+                return Unauthorized("Invalid Token");
             }
 
             var user = await _authenticationRepository.FindByNameAsync(username);
 
             if(user is null || user.RefreshToken != refreshtoken || user.RefreshTokenExpiryTime <= DateTime.Now)
             {
-                return BadRequest("Invalid Access Token and refresh Token");
+                return Unauthorized("Invalid Access Token and refresh Token");
             }
 
 
