@@ -24,6 +24,8 @@ namespace Master_BLL
             services.AddMemoryCache();
             services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
 
+         
+
 
             
 
