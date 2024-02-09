@@ -20,5 +20,7 @@ namespace Master_DAL.DbContext
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<Articles> Articles { get; set; }
+        public DbSet<Comments> Comments { get; set; }
     }
 }
