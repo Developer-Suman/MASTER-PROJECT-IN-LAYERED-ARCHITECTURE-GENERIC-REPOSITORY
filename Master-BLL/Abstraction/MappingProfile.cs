@@ -16,6 +16,12 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             CreateMap<ArticlesGetDTOs, Articles>().ReverseMap();
 
             CreateMap<CommentsGetDTOs, Comments>().ReverseMap();
+            CreateMap<CommentsWithArticles, Comments>().ReverseMap()
+                .ForMember(dest => dest.CommentsId, opt => opt.MapFrom(src => src.CommentsId))
+                .ForMember(dest => dest.CommentDescription, opt => opt.MapFrom(src => src.CommentDescription))
+                .ForMember(dest => dest.ArticleName, opt => opt.MapFrom(src => src.Articles.ArticlesTitle));
+              
+
             
         }
     }
