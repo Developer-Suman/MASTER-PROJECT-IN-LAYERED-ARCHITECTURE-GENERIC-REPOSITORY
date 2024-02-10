@@ -125,6 +125,44 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
+        public async Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize)
+        {
+            try
+            {
+                var commentsWithArticlesEntities = await _context.Articles
+    .SelectMany(article => article.Comments)
+    .AsNoTracking() 
+    .Skip((1 - page) * pageSize)
+    .Take(pageSize)
+    .ToListAsync();
+
+                var commentsWithArticlesDTOs = _mapper.Map<List<CommentsWithArticles>>(commentsWithArticlesEntities);
+
+
+
+                //List<CommentsWithArticles> commentsWithArticles = await _context.Articles.SelectMany(x => x.Comments
+                //.Select(x => _mapper.Map<CommentsWithArticles>(x)));
+
+                #region ImplementArticlesNameInAutomapper
+                //List<CommentsWithArticles> commentsWithArticles = await _context.Articles.SelectMany(x => x.Comments
+                //.Select(x => new CommentsWithArticles()
+                //{
+                //    CommentsId = x.CommentsId,
+                //    CommentDescription = x.CommentDescription,
+                //    ArticleName = x.Articles.ArticlesTitle,
+
+                //})).AsNoTracking().Skip((1 - page) * pageSize).Take(pageSize).ToListAsync();
+                #endregion
+
+
+                return Result<List<CommentsWithArticles>>.Success(commentsWithArticlesDTOs);
+
+            }catch(Exception)
+            {
+                throw new Exception("An error occured while getting Comments from Articles");
+            }
+        }
+
         public Task<ArticlesGetDTOs> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs)
         {
             throw new NotImplementedException();

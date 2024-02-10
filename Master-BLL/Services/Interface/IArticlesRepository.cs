@@ -1,4 +1,5 @@
 ﻿using Master_BLL.DTOs.Articles;
+using Master_BLL.DTOs.Comment;
 using Master_DAL.Abstraction;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace Master_BLL.Services.Interface
         Task<ArticlesGetDTOs> DeleteArticles(Guid ArticlesId);
         Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize);
         Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize);
+        Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize);
 
     }
 }
