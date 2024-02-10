@@ -45,10 +45,11 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpGet("GetArticlesWithComments")]
-        public async Task<IActionResult> GetArticlesWithComments(int page, int pageSize)
+        public IActionResult GetArticlesWithComments(int page, int pageSize)
         {
-            var articleswithcomments = await _articlesRepository.GetArticlesWithComments(page, pageSize);
-            return Ok();
+            var articlesWithComments = _articlesRepository.GetArticlesWithComments(page, pageSize);
+            return Ok(articlesWithComments.Data);
         }
+
     }
 }
