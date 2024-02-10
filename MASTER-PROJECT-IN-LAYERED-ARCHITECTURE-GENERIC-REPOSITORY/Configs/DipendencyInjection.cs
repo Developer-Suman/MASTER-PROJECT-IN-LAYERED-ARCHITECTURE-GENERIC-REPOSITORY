@@ -57,6 +57,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             builder.Services.AddScoped<IAccountServices, AccountServices>();
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
+            builder.Services.AddScoped<IArticlesRepository, ArticlesRepository>();
             #endregion
 
         }

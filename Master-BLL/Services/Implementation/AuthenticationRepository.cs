@@ -5,6 +5,7 @@ using Master_BLL.Static.Cache;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,6 +103,38 @@ namespace Master_BLL.Services.Implementation
             return userDTO;
         }
 
+        #region usingIQueryable
+        //public async Task<IQueryable<UserDTOs>?> GetAllUsers(int page, int pageSize)
+        //{
+        //    var cacheKeys = CacheKeys.User;
+        //    var cacheData = await _memoryCacheRepository.GetCahceKey<IEnumerable<UserDTOs>>(cacheKeys);
+
+        //    if (cacheData is not null && cacheData.Any())
+        //    {
+        //        // If data is found in the cache, return an IQueryable from the cached data
+        //        return cacheData.AsQueryable();
+        //    }
+
+        //    var users = await _userManager.Users.AsNoTracking()
+        //        .OrderByDescending(x => x.CreatedAt)
+        //        .Skip((page - 1) * pageSize)
+        //        .Take(pageSize)
+        //        .ToListAsync();
+
+        //    var userDTOs = _mapper.Map<IEnumerable<UserDTOs>>(users);
+
+        //    // Cache the data itself
+        //    await _memoryCacheRepository.SetAsync(cacheKeys, userDTOs, new MemoryCacheEntryOptions
+        //    {
+        //        AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
+        //    });
+
+        //    // Return an IQueryable from the cached data
+        //    return userDTOs.AsQueryable();
+        //}
+
+        #endregion
+
         public async Task<UserDTOs> GetById(string id)
         {
             var caheKey = $"GetById{id}";
@@ -116,11 +149,13 @@ namespace Master_BLL.Services.Implementation
             {
                 return default!;
             }
-            await _memoryCacheRepository.SetAsync<ApplicationUser>(caheKey, user, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+
+            var userDTOs = _mapper.Map<UserDTOs>(user);
+            await _memoryCacheRepository.SetAsync<UserDTOs>(caheKey, userDTOs, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
             {
                 AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5)
             });
-            var userDTOs = _mapper.Map<UserDTOs>(user);
+            
             return userDTOs;
         }
 

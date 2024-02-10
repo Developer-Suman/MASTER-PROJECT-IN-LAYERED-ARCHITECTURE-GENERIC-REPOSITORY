@@ -13,7 +13,8 @@ namespace Master_DAL.Models
         public Guid ArticlesId { get; set; }
         public string ArticlesTitle { get; set; }
         public string ArticlesContent { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public bool IsActive { get; set; }
         public ICollection<Comments> Comments { get; set; }
 
         #region DomainDriven
