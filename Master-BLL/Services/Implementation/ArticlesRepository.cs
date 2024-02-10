@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Articles;
+using Master_BLL.DTOs.Comment;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
@@ -98,22 +99,27 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public Task<Result<IQueryable<ArticlesWithCommentsDTOs>>> GetArticlesWithComments(int page, int pageSize)
+        public Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize)
         {
             try
             {
-                IQueryable<ArticlesWithCommentsDTOs> articles = _context.Articles.Include(x => x.Comments)
-                    .Select(artices => new ArticlesWithCommentsDTOs
+                IQueryable <ArticlesWithCommentsDTOs> articleswithComments = _context.Articles
+                    .Include(x => x.Comments)
+                    .Select(articles => new ArticlesWithCommentsDTOs
                     {
-                        ArticlesId = artices.ArticlesId,
-                        ArticlesTitle = artices.ArticlesTitle,
-                        ArticlesContent = artices.ArticlesContent,
-                        Comments = artices.Comments,
+                        ArticlesId = articles.ArticlesId,
+                        ArticlesTitle = articles.ArticlesTitle,
+                        ArticlesContent = articles.ArticlesContent,
+                        Comments = articles.Comments.Select(a=>_mapper.Map<CommentsGetDTOs>(a)).ToList(),
+                   
 
-                    }).AsNoTracking().AsQueryable();
-                return Task.FromResult(Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articles));
+                    }).AsNoTracking().Skip((page-1)*pageSize).Take(pageSize).AsQueryable();
 
-            }catch(Exception ex)
+
+                return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articleswithComments);
+
+            }
+            catch(Exception ex)
             {
                 throw new Exception("An error occured while getting AllArticleswithComments");
             }

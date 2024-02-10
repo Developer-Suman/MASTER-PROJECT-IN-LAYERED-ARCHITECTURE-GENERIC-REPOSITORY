@@ -1,4 +1,6 @@
-﻿using Master_DAL.Models;
+﻿
+using Master_BLL.DTOs.Comment;
+using Master_DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,6 @@ namespace Master_BLL.DTOs.Articles
         public string ArticlesContent { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
-        public ICollection<Comments> Comments { get; set; }
+        public ICollection<CommentsGetDTOs> Comments { get; set; }
     }
 }

@@ -15,7 +15,7 @@ namespace Master_BLL.Services.Interface
         Task<ArticlesGetDTOs> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs);
         Task<ArticlesGetDTOs> DeleteArticles(Guid ArticlesId);
         Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize);
-        Task<Result<IQueryable<ArticlesWithCommentsDTOs>>> GetArticlesWithComments(int page, int pageSize);
+        Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize);
 
     }
 }
