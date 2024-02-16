@@ -31,6 +31,11 @@ namespace Master_BLL.Services.Implementation
             throw new NotImplementedException();
         }
 
+        public void UpdateMultipleImage(List<IFormFile> file)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<string> UploadImage(IFormFile file)
         {
             try
@@ -60,6 +65,11 @@ namespace Master_BLL.Services.Implementation
             {
                 throw new Exception("An error occur while Upload Image");
             }
+        }
+
+        public Task<List<string>> UploadMultipleImage(List<IFormFile> files)
+        {
+            throw new NotImplementedException();
         }
     }
 }
