@@ -31,6 +31,7 @@ namespace Master_BLL.Services.Implementation
         }
         public async Task<ArticlesGetDTOs> DeleteArticles(Guid ArticlesId)
         {
+            //Implement IMemoryCache and remove that before delete articles
             throw new NotImplementedException();
 
         }
@@ -116,6 +117,7 @@ namespace Master_BLL.Services.Implementation
                     }).AsNoTracking().Skip((page-1)*pageSize).Take(pageSize).AsQueryable();
 
 
+
                 return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articleswithComments);
 
             }
@@ -129,14 +131,32 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
-                var commentsWithArticlesEntities = await _context.Articles
-    .SelectMany(article => article.Comments)
-    .AsNoTracking() 
-    .Skip((1 - page) * pageSize)
-    .Take(pageSize)
-    .ToListAsync();
+                var cacheKey = $"GetCommentsWithArticlesName{page}{pageSize}";
+                var cacheData = await _memoryCacheRepository.GetCahceKey<List<CommentsWithArticles>>(cacheKey);
 
-                var commentsWithArticlesDTOs = _mapper.Map<List<CommentsWithArticles>>(commentsWithArticlesEntities);
+                if (cacheData is not null)
+                {
+                    return Result<List<CommentsWithArticles>>.Success(cacheData);
+                }
+
+              
+
+                List<CommentsWithArticles> commentsWithArticles = await _context.Articles.SelectMany(x => x.Comments
+                .Select(x => new CommentsWithArticles()
+                {
+                    CommentsId = x.CommentsId,
+                    CommentDescription = x.CommentDescription,
+                    ArticleName = x.Articles.ArticlesTitle,
+
+                })).AsNoTracking().Skip((1 - page) * pageSize).Take(pageSize).ToListAsync();
+
+
+
+                await _memoryCacheRepository.SetAsync(cacheKey, commentsWithArticles, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
+
+                });
 
 
 
@@ -155,9 +175,10 @@ namespace Master_BLL.Services.Implementation
                 #endregion
 
 
-                return Result<List<CommentsWithArticles>>.Success(commentsWithArticlesDTOs);
+                return Result<List<CommentsWithArticles>>.Success(commentsWithArticles);
 
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 throw new Exception("An error occured while getting Comments from Articles");
             }
@@ -165,11 +186,13 @@ namespace Master_BLL.Services.Implementation
 
         public Task<ArticlesGetDTOs> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs)
         {
+            //Use IMemoryCache and Remove that before creating
             throw new NotImplementedException();
         }
 
         public Task<ArticlesGetDTOs> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs)
         {
+            //Use IMemoryCache and Remove that before Updating
             throw new NotImplementedException();
         }
     }
