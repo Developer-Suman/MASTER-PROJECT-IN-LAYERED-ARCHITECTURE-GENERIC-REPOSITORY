@@ -12,10 +12,6 @@ builder.Services
     .AddBLL()
     .AddDAL(configuration);
 
-
-
-
-
 var app = builder.Build();
 
 
